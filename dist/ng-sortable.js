@@ -260,6 +260,8 @@
         dragItem: function (item) {
 
           return {
+            startIndex: item.index(),
+            startParent: item.sortableScope,
             index: item.index(),
             parent: item.sortableScope,
             source: item,
@@ -286,6 +288,11 @@
               // return false otherwise
               return false;
             },
+            rollbackPosition: function() {
+              // rollback dragItem do initial position
+              this.parent = this.startParent;
+              this.index = this.startIndex;
+             },
             moveTo: function (parent, index) {
               // move the item to a new position
               this.parent = parent;
@@ -912,6 +919,13 @@
               targetScope = fetchScope(targetElement);
 
               if (!targetScope || !targetScope.type) {
+                if (!scope.itemScope.sortableScope.cloning) {
+                    placeElement.replaceWith(scope.itemScope.element);
+                 }
+
+                 placeHolder.remove();
+                 dragItemInfo.rollbackPosition();
+
                 return;
               }
               if (targetScope.type === 'handle') {
@@ -925,25 +939,43 @@
                 // decide where to insert placeholder based on target element and current placeholder if is present
                 targetElement = targetScope.element;
 
+                var scrollableContainerWindow = scope.sortableScope.options.scrollableContainerWindow ? scope.sortableScope.options.scrollableContainerWindow : scrollableContainer;
+
                 // Fix #241 Drag and drop have trembling with blocks of different size
-                var targetElementOffset = $helper.offset(targetElement, scrollableContainer);
+                var targetElementOffset = $helper.offset(targetElement, scrollableContainerWindow);
                 if (!dragItemInfo.canMove(itemPosition, targetElement, targetElementOffset)) {
-                  return;
+                    //return;
                 }
 
+                
                 var placeholderIndex = placeHolderIndex(targetScope.sortableScope.element);
+                var containerOffset = $helper.offset(dragItemInfo.parent.element);
+                var variableT = 0;
+              
+
                 if (placeholderIndex < 0) {
                   insertBefore(targetElement, targetScope);
+                 
                 } else {
-                  if (placeholderIndex <= targetScope.index()) {
+                 
+                  if (placeholderIndex <= targetScope.index() && (targetElementOffset.top+targetElementOffset.height+eventObj.pageY) < ($window.pageYOffset || $document[0].documentElement.scrollTop) + ($window.innerHeight||$document[0].documentElement.height) ) {
                     insertAfter(targetElement, targetScope);
-                  } else {
+                  
+                  }else if ( (($window.pageYOffset || $document[0].documentElement.scrollTop)  < (targetElementOffset.top+targetElementOffset.height)  && (eventObj.pageY > (containerOffset.top+containerOffset.height+variableT) ) ) || (placeholderIndex == 1 && eventObj.pageY < $helper.offset(dragItemInfo.parent.element).top+targetElementOffset.height)  ){
+                    
                     insertBefore(targetElement, targetScope);
+                   
                   }
+                  else if ( (eventObj.pageY+targetElementOffset.height > ($window.pageYOffset || $document[0].documentElement.scrollTop) + ($window.innerHeight||$document[0].documentElement.height) )  || (eventObj.pageY < (containerOffset.top+containerOffset.height+variableT) ) )
+                  {
+                    insertAfter(targetElement, targetScope);
+                  }
+                  
                 }
+
               }
 
-              if (targetScope.type === 'sortable') {//sortable scope.
+              else if (targetScope.type === 'sortable') {//sortable scope.
                 if (targetScope.accept(scope, targetScope) &&
                   !isParent(targetScope.element[0], targetElement[0])) {
                   //moving over sortable bucket. not over item.
@@ -952,6 +984,11 @@
                     dragItemInfo.moveTo(targetScope, targetScope.modelValue.length);
                   }
                 }
+              }
+              else {
+                // back dragItemInfo index and parent to default
+                placeHolder.remove();
+                dragItemInfo.rollbackPosition();
               }
             }
           };
