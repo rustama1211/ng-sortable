@@ -961,13 +961,12 @@
                   if (placeholderIndex <= targetScope.index() && (targetElementOffset.top+targetElementOffset.height+eventObj.pageY) < ($window.pageYOffset || $document[0].documentElement.scrollTop) + ($window.innerHeight||$document[0].documentElement.height) ) {
                     insertAfter(targetElement, targetScope);
                   
-                  }else if ( (($window.pageYOffset || $document[0].documentElement.scrollTop)  < (targetElementOffset.top+targetElementOffset.height)  && (eventObj.pageY > (containerOffset.top+containerOffset.height+variableT) ) ) || (placeholderIndex == 1 && eventObj.pageY < $helper.offset(dragItemInfo.parent.element).top+targetElementOffset.height)  ){
-                    
+                  }else if ( (($window.pageYOffset || $document[0].documentElement.scrollTop)  < (targetElementOffset.top+targetElementOffset.height)  && (eventObj.pageY > (containerOffset.top+containerOffset.height+variableT) ) ) || ( eventObj.pageY < $helper.offset(dragItemInfo.parent.element).top+($helper.offset(dragItemInfo.parent.element).height/2)+variableT )  ){
                     insertBefore(targetElement, targetScope);
-                   
                   }
                   else if ( (eventObj.pageY+targetElementOffset.height > ($window.pageYOffset || $document[0].documentElement.scrollTop) + ($window.innerHeight||$document[0].documentElement.height) )  || (eventObj.pageY < (containerOffset.top+containerOffset.height+variableT) ) )
                   {
+                    
                     insertAfter(targetElement, targetScope);
                   }
                   
