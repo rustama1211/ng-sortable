@@ -919,13 +919,6 @@
               targetScope = fetchScope(targetElement);
 
               if (!targetScope || !targetScope.type) {
-                if (!scope.itemScope.sortableScope.cloning) {
-                    placeElement.replaceWith(scope.itemScope.element);
-                 }
-
-                 placeHolder.remove();
-                 dragItemInfo.rollbackPosition();
-
                 return;
               }
               if (targetScope.type === 'handle') {
@@ -939,7 +932,7 @@
                 // decide where to insert placeholder based on target element and current placeholder if is present
                 targetElement = targetScope.element;
 
-                var scrollableContainerWindow = scope.sortableScope.options.scrollableContainerWindow ? scope.sortableScope.options.scrollableContainerWindow : scrollableContainer;
+                var scrollableContainerWindow = scope.sortableScope.options.scrollableContainerWindow ? $window : scrollableContainer;
 
                 // Fix #241 Drag and drop have trembling with blocks of different size
                 var targetElementOffset = $helper.offset(targetElement, scrollableContainerWindow);
